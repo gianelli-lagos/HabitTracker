@@ -1,2 +1,2 @@
-# SSW590
+# HabitTracker
 SSW590 Team Project
