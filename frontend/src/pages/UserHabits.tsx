@@ -2,12 +2,10 @@ export default function UserHabits() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>🏆 My Habits</h1>
-        <p style={styles.subtitle}>Your habit tracking dashboard will live here.</p>
+        <h1 style={styles.title}>My Habits</h1>
+        <p style={styles.subtitle}>Your habit tracking dashboard</p>
         <div style={styles.placeholder}>
-          <p>📋 Habit list coming soon</p>
-          <p>🔥 Streak tracking coming soon</p>
-          <p>📅 Calendar heatmap coming soon</p>
+          <p>Habit Stuff</p>
         </div>
       </div>
     </div>
