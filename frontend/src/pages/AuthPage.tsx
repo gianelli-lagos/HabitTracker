@@ -82,7 +82,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F5F3FF",
+    backgroundColor: "#7C3AED",
   },
   card: {
     backgroundColor: "#fff",
