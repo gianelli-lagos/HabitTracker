@@ -1,10 +1,33 @@
-#environment variables
+# Environment variables
 .env
+.env.*
 .env.local
-#python
+!.env.example
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
-#node and react
+env/
+ENV/
+
+# Node / React
 node_modules/
-/frontend/build
+frontend/build
+frontend/package-lock.json
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database files
+*.db
+*.sqlite3
