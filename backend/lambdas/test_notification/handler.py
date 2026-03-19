@@ -22,7 +22,7 @@ def lambda_handler(event, context):
         
         # Create test notification
         notification = Notification(
-            user_id=1,  # Assumes user with ID 1 exists
+            user_id=3,  # Assumes user with ID 1 exists
             type='test',
             title='🚀 Lambda Test',
             message='Lambda function successfully connected to database!',

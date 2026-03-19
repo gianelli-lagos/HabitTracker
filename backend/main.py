@@ -11,6 +11,7 @@ load_dotenv()
 # Import all models so Base.metadata.create_all() knows about them
 from models.user import User
 from models.notification import Notification
+from models import user, notification, habit
 
 # Wait for database to be ready
 for i in range(10):

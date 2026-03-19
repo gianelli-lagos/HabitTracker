@@ -14,3 +14,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     notifications = relationship("Notification", back_populates="user")
+    habits = relationship("Habit", back_populates="user")
