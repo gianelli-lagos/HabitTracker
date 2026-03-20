@@ -1,0 +1,10 @@
+#environment variables
+.env
+.env.local
+#python
+__pycache__/
+*.pyc
+venv/
+#node and react
+node_modules/
+/frontend/build
