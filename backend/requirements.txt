@@ -1,0 +1,29 @@
+# Web Framework
+fastapi==0.123.2
+uvicorn==0.35.0
+pydantic==2.11.7
+
+# Database
+sqlalchemy==2.0.48
+psycopg2-binary==2.9.11
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.9
+
+# Testing
+pytest==9.0.2
+pytest-cov==7.0.0
+coverage==7.13.5
+
+# Dependencies (auto-installed with above)
+typing_extensions==4.15.0
+packaging==26.0
+pluggy==1.6.0
+iniconfig==2.3.0
+Pygments==2.19.2

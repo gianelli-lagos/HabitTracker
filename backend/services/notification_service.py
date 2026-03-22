@@ -57,10 +57,17 @@ def mark_all_read(db: Session, user_id: int):
     ).update({"is_read": True, "read_at": datetime.utcnow()})
     db.commit()
 
-def delete_notification(db: Session, notification_id: int):
-    """Delete a notification"""
-    notification = db.query(Notification).filter(Notification.id == notification_id).first()
+def delete_notification(db, notification_id):
+    """
+    Delete a notification
+    """
+    notification = db.query(Notification).filter(
+        Notification.id == notification_id
+    ).first()
+    
     if notification:
         db.delete(notification)
         db.commit()
-    return notification
+        return True
+    
+    return False

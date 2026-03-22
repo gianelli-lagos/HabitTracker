@@ -3,20 +3,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 def get_db_session():
-    """Create and return a new database session (useful for Lambda or stateless apps)."""
-
-    # Get the database connection string from environment variables
-    database_url = os.getenv("DATABASE_URL")
-
-    # Fail early if the connection string is missing
-    if not database_url:
-        raise ValueError("DATABASE_URL environment variable not set")
+    """
+    Get database session for Lambda functions
+    Works for both local and AWS (uses environment variable)
+    """
+    # Try environment variable first, then use local default
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL",
+        "postgresql://postgres:password@localhost:5433/habittracker"  # Local default
+    )
     
-    # Initialize the database engine (handles connections under the hood)
-    engine = create_engine(database_url)
-
-    # Create a session factory bound to this engine
-    SessionLocal = sessionmaker(bind=engine)
-
-    # Return a new session instance (caller should close it after use)
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=3600
+    )
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
     return SessionLocal()
