@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, notifications
+from routers import auth, notifications, habits
 import time
 
 # Load environment variables from .env file
@@ -41,6 +41,7 @@ app.add_middleware(
 # Register routers
 app.include_router(auth.router)
 app.include_router(notifications.router)
+app.include_router(habits.router)
 
 @app.get("/")
 def root():
