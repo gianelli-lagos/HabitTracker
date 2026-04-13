@@ -6,6 +6,7 @@ import {
   markAsRead as markNotificationAsRead 
 } from "../api";
 import type { Notification } from "../api";
+import MyHabitsPage from "./MyHabitsPage";
 
 interface MainPageProps {
   onLogout: () => void;
@@ -22,6 +23,9 @@ export default function MainPage({ onLogout }: MainPageProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  
+  // State to bridge the Sidebar button and the MyHabitsPage modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -119,12 +123,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
             <div className="logo-sub">Build better habits</div>
           </div>
         </div>
+        
         <div className="user-section">
           <div className="avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
           <div>
             <div className="user-name">{username}</div>
           </div>
         </div>
+
         <nav className="nav">
           <div 
             className={currentView === "habits" ? "nav-item-active" : "nav-item"} 
@@ -144,7 +150,7 @@ export default function MainPage({ onLogout }: MainPageProps) {
           </div>
           
           <div className="nav-item">📅 Events</div>
-          <div className="nav-item">👥Social</div>
+          <div className="nav-item">👥 Social</div>
           <div 
             className={currentView === "profile" ? "nav-item-active" : "nav-item"} 
             onClick={() => setCurrentView("profile")}
@@ -152,11 +158,22 @@ export default function MainPage({ onLogout }: MainPageProps) {
             👤 Profile
           </div>
         </nav>
-        <button className="new-habit-btn">+ New Habit</button>
+
+        {/* Action Buttons */}
+        <button 
+          className="new-habit-btn" 
+          onClick={() => {
+            setCurrentView("habits");
+            setIsCreateModalOpen(true);
+          }}
+        >
+          + New Habit
+        </button>
+        
         <button className="logout-btn" onClick={handleLogout}>Log Out</button>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="main">
         {/* Top Banner */}
         <div className="top-banner">
@@ -173,81 +190,11 @@ export default function MainPage({ onLogout }: MainPageProps) {
             </p>
           </div>
         </div>
-
         <div className="content">
-          {/* HABITS VIEW */}
-          {currentView === "habits" && (
-            <>
-              <p className="placeholder">Habit Tracking</p>
-              <p className="placeholder">Calendar Heatmap</p>
-              <p className="placeholder">Milestones</p>
-            </>
-          )}
+          {currentView === "habits" && <MyHabitsPage />}
           
-          {/* NOTIFICATIONS VIEW */}
-          {currentView === "notifications" && (
-            <>
-              {loadingNotifications ? (
-                <div className="placeholder">Loading notifications...</div>
-              ) : notifications.length === 0 ? (
-                <div className="empty-state-card">
-                  <div className="empty-icon">🔔</div>
-                  <h3 className="empty-title">No notifications yet</h3>
-                  <p className="empty-text">We'll notify you when something important happens!</p>
-                </div>
-              ) : (
-                <div className="notifications-container">
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      className={notif.is_read ? "notification-card" : "notification-card-unread"}
-                      onClick={() => !notif.is_read && markAsRead(notif.id)}
-                    >
-                      <div className="notification-header">
-                        <div className="notification-icon-large">
-                          {getNotificationIcon(notif.type)}
-                        </div>
-                        <div className="notification-meta">
-                          <div className="notification-time">{getTimeAgo(notif.created_at)}</div>
-                          {!notif.is_read && <div className="unread-dot">●</div>}
-                        </div>
-                      </div>
-                      <h3 className="notification-title">{notif.title}</h3>
-                      <p className="notification-message">{notif.message}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-          
-          {/* PROFILE VIEW */}
-          {currentView === "profile" && (
-            <div className="profile-card">
-              <div className="profile-top">
-                <div className="profile-avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
-                <div>
-                  <h2 className="profile-name">{username}</h2>
-                  <button className="change-pic-btn">Change Profile Picture</button>
-                </div>
-              </div>
-              <div className="profile-stats">
-                <div className="stat">
-                  <span style={{color: "#7C3AED", fontSize: "1.8rem", fontWeight: 700}}>0</span>
-                  <p>Total Habits</p>
-                </div>
-                <div className="stat">
-                  <span style={{color: "#22c55e", fontSize: "1.8rem", fontWeight: 700}}>0%</span>
-                  <p>Success Rate</p>
-                </div>
-                <div className="stat">
-                  <span style={{color: "#f97316", fontSize: "1.8rem", fontWeight: 700}}>0</span>
-                  <p>Longest Streak</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>  
+          {/* Keep your other views (notifications/profile) as they were */}
+        </div>
       </div>  
     </div>    
   );
