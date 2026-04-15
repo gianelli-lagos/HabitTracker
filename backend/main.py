@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, notifications, habits
+from routers import auth, notifications, habits, events
 import time
 
 # Load environment variables from .env file
@@ -11,7 +11,7 @@ load_dotenv()
 # Import all models so Base.metadata.create_all() knows about them
 from models.user import User
 from models.notification import Notification
-from models import user, notification, habit
+from models import user, notification, habit, event
 
 # Wait for database to be ready
 for i in range(10):
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(notifications.router)
 app.include_router(habits.router)
+app.include_router(events.router)
 
 @app.get("/")
 def root():
