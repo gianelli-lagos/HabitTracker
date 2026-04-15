@@ -10,6 +10,25 @@ export interface Notification {
   read_at: string | null;
 }
 
+export interface Habit {
+  id: number;
+  name: string;
+  description: string;
+  current_streak: number;
+  longest_streak: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface HabitLog {
+  id: number;
+  habit_id: number;
+  date: string;
+  logged_at: string;
+}
+
+
+
 const BASE_URL = "http://localhost:8000";
 
 export async function registerUser(username: string, password: string) {
@@ -106,4 +125,90 @@ export async function deleteNotification(notificationId: number): Promise<void> 
   });
   
   if (!res.ok) throw new Error("Failed to delete notification");
+}
+
+// ---------------------------------------------------------------------------------- 
+// ---------------------------------------------------------------------------------- 
+// habit API integration
+
+export async function createHabit(name: string, description?: string): Promise<Habit> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name, description })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to create habit");
+  return data;
+}
+
+
+export async function getHabits(): Promise<Habit[]> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch habits");
+  return res.json();
+}
+
+
+export async function updateHabit(id: number, name: string, description?: string): Promise<Habit> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name, description })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to update habit");
+  return data;
+}
+
+export async function deleteHabit(id: number): Promise<void> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to delete habit");
+}
+
+export async function logHabit(id: number): Promise<{ success: boolean, current_streak: number }> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits/${id}/log`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to log habit");
+  return data;
+}
+
+export async function getHabitLogs(id: number): Promise<HabitLog[]> {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${BASE_URL}/habits/${id}/logs`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch habit logs");
+  return res.json();
 }
