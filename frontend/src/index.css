@@ -377,3 +377,50 @@ body {
 .stat p {
   margin: 0;
 }
+
+
+/* habit system  */
+
+
+.habit-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.habit-card-logged {
+  border: 2px solid #22c55e !important;
+  background-color: #f0fdf4;
+}
+
+.habit-streak {
+  margin: 1rem 0;
+  font-weight: 600;
+  color: #f97316;
+}
+
+.log-habit-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #7C3AED;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.log-habit-button:disabled {
+  background-color: #22c55e;
+  cursor: default;
+  transform: none;
+}
+
+.log-habit-button:hover:not(:disabled) {
+  background-color: #6D28D9;
+  transform: translateY(-1px);
+}

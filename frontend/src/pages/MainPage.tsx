@@ -6,6 +6,7 @@ import {
   markAsRead as markNotificationAsRead 
 } from "../api";
 import type { Notification } from "../api";
+import MyHabitsPage from "./MyHabitsPage";
 
 interface MainPageProps {
   onLogout: () => void;
@@ -22,6 +23,8 @@ export default function MainPage({ onLogout }: MainPageProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -119,12 +122,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
             <div className="logo-sub">Build better habits</div>
           </div>
         </div>
+        
         <div className="user-section">
           <div className="avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
           <div>
             <div className="user-name">{username}</div>
           </div>
         </div>
+
         <nav className="nav">
           <div 
             className={currentView === "habits" ? "nav-item-active" : "nav-item"} 
@@ -144,7 +149,7 @@ export default function MainPage({ onLogout }: MainPageProps) {
           </div>
           
           <div className="nav-item">📅 Events</div>
-          <div className="nav-item">👥Social</div>
+          <div className="nav-item">👥 Social</div>
           <div 
             className={currentView === "profile" ? "nav-item-active" : "nav-item"} 
             onClick={() => setCurrentView("profile")}
@@ -152,7 +157,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
             👤 Profile
           </div>
         </nav>
-        <button className="new-habit-btn">+ New Habit</button>
         <button className="logout-btn" onClick={handleLogout}>Log Out</button>
       </div>
 
@@ -177,11 +181,10 @@ export default function MainPage({ onLogout }: MainPageProps) {
         <div className="content">
           {/* HABITS VIEW */}
           {currentView === "habits" && (
-            <>
-              <p className="placeholder">Habit Tracking</p>
-              <p className="placeholder">Calendar Heatmap</p>
-              <p className="placeholder">Milestones</p>
-            </>
+            <MyHabitsPage 
+              externalOpenModal={isCreateModalOpen} 
+              onModalClose={() => setIsCreateModalOpen(false)} 
+            />
           )}
           
           {/* NOTIFICATIONS VIEW */}

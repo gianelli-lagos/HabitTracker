@@ -3,6 +3,7 @@ import { isLoggedIn } from "./api";
 import AuthPage from "./pages/AuthPage";
 import MainPage from "./pages/MainPage";
 import UserHabits from "./pages/UserHabits";
+import MyHabitsPage from "./pages/MyHabitsPage";
 
 type Page = "main" | "habits";
 
@@ -23,7 +24,7 @@ export default function App() {
           <button style={currentPage === "habits" ? styles.navBtnActive : styles.navBtn} onClick={() => setCurrentPage("habits")}>My Habits</button>
         </div>
       </nav>
-      {currentPage === "main" ? <MainPage onLogout={() => setLoggedIn(false)} /> : <UserHabits />}
+      {currentPage === "main" ? <MainPage onLogout={() => setLoggedIn(false)} /> : <MyHabitsPage />}
     </div>
   );
 }
