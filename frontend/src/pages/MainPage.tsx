@@ -7,6 +7,7 @@ import {
 } from "../api";
 import type { Notification } from "../api";
 import MyHabitsPage from "./MyHabitsPage";
+import CalendarPage from "./CalendarPage";
 
 interface MainPageProps {
   onLogout: () => void;
@@ -19,7 +20,7 @@ interface User {
 
 export default function MainPage({ onLogout }: MainPageProps) {
   const [username, setUsername] = useState("");
-  const [currentView, setCurrentView] = useState<"habits" | "notifications" | "profile">("habits");
+  const [currentView, setCurrentView] = useState<"habits" | "notifications" | "events" | "profile">("habits");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -148,7 +149,12 @@ export default function MainPage({ onLogout }: MainPageProps) {
             )}
           </div>
           
-          <div className="nav-item">📅 Events</div>
+          <div
+            className={currentView === "events" ? "nav-item-active" : "nav-item"}
+            onClick={() => setCurrentView("events")}
+          >
+            📅 Events
+          </div>
           <div className="nav-item">👥 Social</div>
           <div 
             className={currentView === "profile" ? "nav-item-active" : "nav-item"} 
@@ -168,11 +174,13 @@ export default function MainPage({ onLogout }: MainPageProps) {
             <h1 className="page-title">
               {currentView === "habits" && "My Habits"}
               {currentView === "notifications" && "Notifications"}
+              {currentView === "events" && "Events"}
               {currentView === "profile" && "Profile"}
             </h1>
             <p className="page-subtitle">
               {currentView === "habits" && "Track your progress and stay motivated"}
               {currentView === "notifications" && "Stay updated on your progress"}
+              {currentView === "events" && "See and manage your calendar events"}
               {currentView === "profile" && "Manage your account settings"}
             </p>
           </div>
@@ -250,6 +258,9 @@ export default function MainPage({ onLogout }: MainPageProps) {
               </div>
             </div>
           )}
+
+          {/* EVENTS VIEW */}
+          {currentView === "events" && <CalendarPage />}
         </div>  
       </div>  
     </div>    

@@ -424,3 +424,151 @@ body {
   background-color: #6D28D9;
   transform: translateY(-1px);
 }
+
+/* ========== CALENDAR ========== */
+
+.calendar-wrap {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.event-status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Status badges (modal + list cards) — soft tints aligned with app violet */
+.event-created {
+  background: #f5f3ff;
+  border: 1px solid #c4b5fd;
+  color: #5b21b6;
+}
+
+.event-invited {
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  color: #6d28d9;
+}
+
+.event-accepted {
+  background: #ede9fe;
+  border: 1px solid #a78bfa;
+  color: #4c1d95;
+}
+
+.event-declined {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+/* Calendar bars: light purple (lighter than nav #7C3AED) */
+.fc .fc-event.event-created,
+.fc .fc-event.event-invited,
+.fc .fc-event.event-accepted,
+.fc .fc-event.event-declined {
+  border: 1px solid #ddd6fe !important;
+  background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%) !important;
+  color: #5b21b6 !important;
+  font-weight: 600;
+}
+
+.fc .fc-event.event-declined {
+  opacity: 0.75;
+  text-decoration: line-through;
+}
+
+/* ========== CALENDAR EVENT LISTS (below calendar) ========== */
+
+.calendar-lists-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .calendar-lists-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar-list-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ede9fe;
+}
+
+.calendar-list-section h3 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #4c1d95;
+}
+
+.calendar-list-sub {
+  margin: 0 0 1rem 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.calendar-event-card {
+  text-align: left;
+  width: 100%;
+  border: 1px solid #ede9fe;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+  background: #fafafa;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.calendar-event-card:hover {
+  background: #f5f3ff;
+  border-color: #c4b5fd;
+}
+
+.calendar-event-card:last-child {
+  margin-bottom: 0;
+}
+
+.calendar-event-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1f2937;
+  margin: 0 0 0.35rem 0;
+}
+
+.calendar-event-card-meta {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0.15rem 0;
+  line-height: 1.4;
+}
+
+.calendar-event-card-desc {
+  font-size: 0.82rem;
+  color: #4b5563;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.calendar-list-empty {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin: 0;
+  padding: 0.5rem 0;
+}

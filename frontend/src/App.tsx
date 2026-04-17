@@ -2,10 +2,10 @@ import { useState } from "react";
 import { isLoggedIn } from "./api";
 import AuthPage from "./pages/AuthPage";
 import MainPage from "./pages/MainPage";
-import UserHabits from "./pages/UserHabits";
 import MyHabitsPage from "./pages/MyHabitsPage";
+import CalendarPage from "./pages/CalendarPage";
 
-type Page = "main" | "habits";
+type Page = "main" | "habits" | "calendar";
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
@@ -22,9 +22,12 @@ export default function App() {
         <div style={styles.navLinks}>
           <button style={currentPage === "main" ? styles.navBtnActive : styles.navBtn} onClick={() => setCurrentPage("main")}>Profile</button>
           <button style={currentPage === "habits" ? styles.navBtnActive : styles.navBtn} onClick={() => setCurrentPage("habits")}>My Habits</button>
+          <button style={currentPage === "calendar" ? styles.navBtnActive : styles.navBtn} onClick={() => setCurrentPage("calendar")}>Calendar</button>
         </div>
       </nav>
-      {currentPage === "main" ? <MainPage onLogout={() => setLoggedIn(false)} /> : <MyHabitsPage />}
+      {currentPage === "main" && <MainPage onLogout={() => setLoggedIn(false)} />}
+      {currentPage === "habits" && <MyHabitsPage />}
+      {currentPage === "calendar" && <CalendarPage />}
     </div>
   );
 }

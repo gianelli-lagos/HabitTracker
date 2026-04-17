@@ -27,6 +27,52 @@ export interface HabitLog {
   logged_at: string;
 }
 
+export interface UserProfile {
+  id: number;
+  username: string;
+}
+
+export interface EventAttendee {
+  id?: number;
+  event_id?: number;
+  user_id: number;
+  status: "invited" | "accepted" | "declined";
+  invited_at?: string;
+  responded_at?: string | null;
+  user?: {
+    id: number;
+    username: string;
+  };
+}
+
+export interface Event {
+  id: number;
+  title: string;
+  description: string;
+  start_time: string;
+  end_time: string;
+  location: string;
+  creator_id: number;
+  attendees: EventAttendee[];
+}
+
+export interface CreateEventData {
+  title: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  location?: string;
+  invite_user_ids?: number[];
+}
+
+export interface UpdateEventData {
+  title?: string;
+  description?: string;
+  start_time?: string;
+  end_time?: string;
+  location?: string;
+}
+
 
 
 const BASE_URL = "http://localhost:8000";
@@ -211,4 +257,114 @@ export async function getHabitLogs(id: number): Promise<HabitLog[]> {
 
   if (!res.ok) throw new Error("Failed to fetch habit logs");
   return res.json();
+}
+
+// ----------------------------------------------------------------------------------
+// Event API integration
+
+export async function getProfile(): Promise<UserProfile> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/auth/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to fetch profile");
+  return data;
+}
+
+export async function getEvents(startDate?: string, endDate?: string): Promise<Event[]> {
+  const token = localStorage.getItem("token");
+  const params = new URLSearchParams();
+  if (startDate) params.set("start_date", startDate);
+  if (endDate) params.set("end_date", endDate);
+
+  const query = params.toString();
+  const url = `${BASE_URL}/events${query ? `?${query}` : ""}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to fetch events");
+  return data;
+}
+
+export async function createEvent(data: CreateEventData): Promise<Event> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload.detail || "Failed to create event");
+  return payload;
+}
+
+export async function updateEvent(id: number, data: UpdateEventData): Promise<Event> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload.detail || "Failed to update event");
+  return payload;
+}
+
+export async function deleteEvent(id: number): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const payload = await res.json();
+    throw new Error(payload.detail || "Failed to delete event");
+  }
+}
+
+export async function inviteUsers(eventId: number, userIds: number[]): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events/${eventId}/invite`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ user_ids: userIds }),
+  });
+
+  if (!res.ok) {
+    const payload = await res.json();
+    throw new Error(payload.detail || "Failed to invite users");
+  }
+}
+
+export async function respondToInvite(eventId: number, statusValue: "accepted" | "declined"): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events/${eventId}/respond`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status: statusValue }),
+  });
+
+  if (!res.ok) {
+    const payload = await res.json();
+    throw new Error(payload.detail || "Failed to respond to invite");
+  }
 }
