@@ -15,3 +15,4 @@ class User(Base):
     
     notifications = relationship("Notification", back_populates="user")
     habits = relationship("Habit", back_populates="user")
+    created_events = relationship("Event", back_populates="creator")
