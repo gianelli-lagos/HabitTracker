@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import datetime, timezone, date
 from database import get_db
 from routers.auth import get_current_user
 from models.user import User
-
 from models.habit import HabitLog
 from services.habit_service import (
     createHabit,
@@ -20,8 +19,32 @@ from services.habit_service import (
 )
 from services.notification_service import create_notification
 
-
 router = APIRouter(prefix="/habits", tags=["habits"])
+
+
+#GET    /habits/logs/all   Get all habit logs for heatmap (must be before /{habit_id} routes)
+@router.get("/logs/all")
+def get_all_logs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    results = (
+        db.query(
+            func.date(HabitLog.date).label("date"),
+            func.count(HabitLog.id).label("count")
+        )
+        .filter(HabitLog.user_id == current_user.id)
+        .group_by(func.date(HabitLog.date))
+        .all()
+    )
+    return [
+        {
+            "date": r.date.isoformat() if r.date else None,
+            "count": int(r.count)
+        }
+        for r in results
+    ]
+
 
 #POST   /habits   Create new habit
 @router.post("")
@@ -66,7 +89,6 @@ def update_habit(
     return updateHabit(db, habit_id, current_user.id, name, description)
 
 
-
 #DELETE /habits/{id}  Delete (soft delete)
 @router.delete("/{habit_id}")
 def delete_habit(
@@ -77,7 +99,7 @@ def delete_habit(
     return deleteHabit(db, habit_id, current_user.id)
 
 
-#POST   /habits/{id}/log   Log habit for today 
+#POST   /habits/{id}/log   Log habit for today
 @router.post("/{habit_id}/log")
 def log_habit(
     habit_id: int,
@@ -85,6 +107,9 @@ def log_habit(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    if log_date is None:
+        log_date = datetime.now(timezone.utc).astimezone().date()
+
     log = logHabit(db, habit_id, current_user.id, log_date)
     habit = getHabitByID(db, habit_id, current_user.id)
 
@@ -97,6 +122,7 @@ def log_habit(
             message=f'Incredible! You have maintained "{habit.name}" for {habit.current_streak} days!'
         )
     return log
+
 
 #GET    /habits/{id}/logs  Get habit completion history
 @router.get("/{habit_id}/logs")

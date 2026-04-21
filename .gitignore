@@ -31,3 +31,6 @@ Thumbs.db
 # Database files
 *.db
 *.sqlite3
+
+test_lambda.py
+create_test_data.py
