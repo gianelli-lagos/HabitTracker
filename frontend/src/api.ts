@@ -73,6 +73,29 @@ export interface UpdateEventData {
   location?: string;
 }
 
+// Social API types
+export interface Friend {
+  id: number;
+  username: string;
+  profile_picture_url: string | null;
+}
+
+export interface PendingRequest {
+  id: number;
+  sender: {
+    id: number;
+    username: string;
+    profile_picture_url: string | null;
+  };
+  created_at: string;
+}
+
+export interface SearchUser {
+  id: number;
+  username: string;
+  profile_picture_url: string | null;
+}
+
 
 
 const BASE_URL = "http://localhost:8000";
@@ -394,4 +417,73 @@ export async function uploadProfilePicture(file: File): Promise<{ profile_pictur
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Failed to upload picture");
   return data;
+}
+
+// Social API functions
+export async function searchUsers(query: string): Promise<SearchUser[]> {
+  const token = localStorage.getItem("token");
+  const params = new URLSearchParams();
+  params.set("q", query);
+
+  const res = await fetch(`${BASE_URL}/social/search?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to search users");
+  return res.json();
+}
+
+export async function sendFriendRequest(username: string): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/social/friend-request`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ username })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to send friend request");
+}
+
+export async function getPendingRequests(): Promise<PendingRequest[]> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/social/pending-requests`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch pending requests");
+  return res.json();
+}
+
+export async function acceptFriendRequest(requestId: number): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/social/friend-request/${requestId}/accept`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to accept friend request");
+}
+
+export async function rejectFriendRequest(requestId: number): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/social/friend-request/${requestId}/reject`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to reject friend request");
+}
+
+export async function getFriends(): Promise<Friend[]> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/social/friends`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch friends");
+  return res.json();
 }

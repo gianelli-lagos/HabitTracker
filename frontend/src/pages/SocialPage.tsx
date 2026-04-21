@@ -5,15 +5,21 @@ import {
   acceptFriendRequest,
   rejectFriendRequest,
   getFriends,
+  searchUsers,
+} from "../api";
+import type {
   Friend,
   PendingRequest,
+  SearchUser,
 } from "../api";
 
 export default function SocialPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usernameInput, setUsernameInput] = useState("");
+  const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -21,6 +27,19 @@ export default function SocialPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.trim()) {
+        performSearch();
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   async function fetchData() {
     try {
@@ -39,16 +58,35 @@ export default function SocialPage() {
     }
   }
 
-  async function handleSendRequest(e: React.FormEvent) {
-    e.preventDefault();
-    if (!usernameInput.trim()) return;
+  async function performSearch() {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearching(true);
+      setError("");
+      const results = await searchUsers(searchQuery);
+      setSearchResults(results);
+    } catch (err) {
+      console.error("Search failed:", err);
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  async function handleSendRequest(username: string) {
+    if (!username.trim()) return;
 
     try {
       setError("");
       setMessage("");
-      await sendFriendRequest(usernameInput);
-      setMessage(`Friend request sent to ${usernameInput}!`);
-      setUsernameInput("");
+      await sendFriendRequest(username);
+      setMessage(`Friend request sent to ${username}!`);
+      setSearchQuery("");
+      setSearchResults([]);
       // Optionally refresh (request will show as pending on their end)
     } catch (err) {
       const errMsg = (err as Error).message;
@@ -87,20 +125,50 @@ export default function SocialPage() {
       {/* Add Friend Section */}
       <div className="social-card">
         <h3 className="social-card-title">Add Friend</h3>
-        <form onSubmit={handleSendRequest} className="friend-form">
-          <div className="form-group">
-            <input
-              type="text"
-              placeholder="Enter username..."
-              value={usernameInput}
-              onChange={(e) => setUsernameInput(e.target.value)}
-              className="friend-input"
-            />
-            <button type="submit" className="friend-btn">
-              Send Request
-            </button>
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Search by username..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
+        {searching && <p className="loading-text">Searching...</p>}
+
+        {searchResults.length > 0 && (
+          <div className="search-results">
+            {searchResults.map((user) => (
+              <div key={user.id} className="search-result-item">
+                <div className="result-avatar" style={{
+                  backgroundImage: user.profile_picture_url 
+                    ? `url(http://localhost:8000${user.profile_picture_url})` 
+                    : undefined,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  color: user.profile_picture_url ? "transparent" : "white"
+                }}>
+                  {!user.profile_picture_url && user.username?.[0]?.toUpperCase()}
+                </div>
+                <div className="result-info">
+                  <p className="result-username">{user.username}</p>
+                </div>
+                <button
+                  onClick={() => handleSendRequest(user.username)}
+                  className="btn-add-friend"
+                >
+                  Add
+                </button>
+              </div>
+            ))}
           </div>
-        </form>
+        )}
+
+        {searchQuery.trim() && searchResults.length === 0 && !searching && (
+          <p className="empty-text">No users found matching "{searchQuery}"</p>
+        )}
+
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}
       </div>

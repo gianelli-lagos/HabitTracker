@@ -9,6 +9,7 @@ import {
 import type { Notification } from "../api";
 import MyHabitsPage from "./MyHabitsPage";
 import CalendarPage from "./CalendarPage";
+import SocialPage from "./SocialPage";
 
 interface MainPageProps {
   onLogout: () => void;
@@ -23,7 +24,7 @@ interface User {
 export default function MainPage({ onLogout }: MainPageProps) {
   const [username, setUsername] = useState("");
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<"habits" | "notifications" | "events" | "profile">("habits");
+  const [currentView, setCurrentView] = useState<"habits" | "notifications" | "events" | "social" | "profile">("habits");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -166,7 +167,12 @@ export default function MainPage({ onLogout }: MainPageProps) {
           >
             📅 Events
           </div>
-          <div className="nav-item">👥 Social</div>
+          <div 
+            className={currentView === "social" ? "nav-item-active" : "nav-item"}
+            onClick={() => setCurrentView("social")}
+          >
+            👥 Social
+          </div>
           <div 
             className={currentView === "profile" ? "nav-item-active" : "nav-item"} 
             onClick={() => setCurrentView("profile")}
@@ -186,12 +192,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
               {currentView === "habits" && "My Habits"}
               {currentView === "notifications" && "Notifications"}
               {currentView === "events" && "Events"}
+              {currentView === "social" && "Social"}
               {currentView === "profile" && "Profile"}
             </h1>
             <p className="page-subtitle">
               {currentView === "habits" && "Track your progress and stay motivated"}
               {currentView === "notifications" && "Stay updated on your progress"}
               {currentView === "events" && "See and manage your calendar events"}
+              {currentView === "social" && "Connect with friends and share your journey"}
               {currentView === "profile" && "Manage your account settings"}
             </p>
           </div>
@@ -296,6 +304,9 @@ export default function MainPage({ onLogout }: MainPageProps) {
 
           {/* EVENTS VIEW */}
           {currentView === "events" && <CalendarPage />}
+
+          {/* SOCIAL VIEW */}
+          {currentView === "social" && <SocialPage />}
         </div>  
       </div>  
     </div>    
