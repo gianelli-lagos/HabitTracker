@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, notifications, habits, events
+from routers import auth, notifications, habits, events, users
 import time
+import os
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,6 +28,12 @@ for i in range(10):
 
 app = FastAPI(title="Habit Tracker API")
 
+# Create uploads directory if it doesn't exist
+os.makedirs("uploads", exist_ok=True)
+
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # CORS allows to connect REACT w/ backend
 app.add_middleware(
     CORSMiddleware,
@@ -40,6 +48,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(auth.router)
+app.include_router(users.router)
 app.include_router(notifications.router)
 app.include_router(habits.router)
 app.include_router(events.router)
