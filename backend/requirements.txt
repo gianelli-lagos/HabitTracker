@@ -20,6 +20,7 @@ python-multipart==0.0.9
 pytest==9.0.2
 pytest-cov==7.0.0
 coverage==7.13.5
+httpx==0.27.0
 
 # Dependencies (auto-installed with above)
 typing_extensions==4.15.0
