@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from database import engine, Base
-from routers import auth, notifications, habits, events, users
+from routers import auth, notifications, habits, events, users, social
 import time
 import os
 
@@ -13,6 +13,7 @@ load_dotenv()
 # Import all models so Base.metadata.create_all() knows about them
 from models.user import User
 from models.notification import Notification
+from models.social import FriendRequest
 from models import user, notification, habit, event
 
 # Wait for database to be ready
@@ -52,6 +53,7 @@ app.include_router(users.router)
 app.include_router(notifications.router)
 app.include_router(habits.router)
 app.include_router(events.router)
+app.include_router(social.router)
 
 @app.get("/")
 def root():
