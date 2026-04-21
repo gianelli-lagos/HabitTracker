@@ -27,6 +27,33 @@ class UserBriefResponse(BaseModel):
     username: str
     profile_picture_url: str | None = None
 
+# Endpoint 0: Search users by username
+@router.get("/search")
+async def search_users(
+    q: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Search for users by username. Query parameter 'q' is required."""
+    if not q or len(q) < 1:
+        return []
+    
+    # Search for users matching the query, excluding current user
+    users = db.query(User).filter(
+        User.username.ilike(f"%{q}%"),
+        User.id != current_user.id
+    ).limit(20).all()  # Limit to 20 results
+    
+    result = []
+    for user in users:
+        result.append({
+            "id": user.id,
+            "username": user.username,
+            "profile_picture_url": user.profile_picture_url
+        })
+    
+    return result
+
 # Endpoint 1: Send friend request
 @router.post("/friend-request")
 async def send_friend_request(
