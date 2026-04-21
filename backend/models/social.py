@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
-# Enum for friend request status
+# For friend request status
 class FriendRequestStatus(str, enum.Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"

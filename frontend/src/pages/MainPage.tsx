@@ -137,7 +137,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
       {/* Sidebar */}
       <div className="sidebar">
         <div className="user-section">
-          <div className="avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
           <div>
             <div className="user-name">{username}</div>
           </div>
@@ -252,6 +251,7 @@ export default function MainPage({ onLogout }: MainPageProps) {
                   backgroundImage: profilePictureUrl ? `url(${profilePictureUrl})` : undefined,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  backgroundColor: profilePictureUrl ? "transparent" : "#f97316",
                   color: profilePictureUrl ? "transparent" : "white"
                 }}>
                   {!profilePictureUrl && (username?.[0]?.toUpperCase() ?? "?")}

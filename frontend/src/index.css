@@ -66,13 +66,14 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #7C3AED;
-  color: #fff;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1rem;
+  background-size: cover;
+  background-position: center;
 }
 
 .user-name {
@@ -335,6 +336,8 @@ body {
   justify-content: center;
   font-size: 2rem;
   font-weight: 700;
+  background-size: cover;
+  background-position: center;
 }
 
 .profile-name {
