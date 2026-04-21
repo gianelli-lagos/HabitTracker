@@ -3,7 +3,8 @@ import {
   logoutUser, 
   getNotifications, 
   getUnreadCount, 
-  markAsRead as markNotificationAsRead 
+  markAsRead as markNotificationAsRead,
+  uploadProfilePicture
 } from "../api";
 import type { Notification } from "../api";
 import MyHabitsPage from "./MyHabitsPage";
@@ -16,10 +17,12 @@ interface MainPageProps {
 interface User {
   id: number;
   username: string;
+  profile_picture_url?: string;
 }
 
 export default function MainPage({ onLogout }: MainPageProps) {
   const [username, setUsername] = useState("");
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<"habits" | "notifications" | "events" | "profile">("habits");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
@@ -33,7 +36,12 @@ export default function MainPage({ onLogout }: MainPageProps) {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
-        .then((data: User) => setUsername(data.username))
+        .then((data: User) => {
+          setUsername(data.username);
+          if (data.profile_picture_url) {
+            setProfilePictureUrl(`http://localhost:8000${data.profile_picture_url}`);
+          }
+        })
         .catch(err => console.error("Profile fetch error:", err));
     }
   }, []);
@@ -86,6 +94,19 @@ export default function MainPage({ onLogout }: MainPageProps) {
     onLogout();
   }
 
+  async function handleProfilePictureUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const result = await uploadProfilePicture(file);
+      setProfilePictureUrl(`http://localhost:8000${result.profile_picture_url}`);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert("Failed to upload profile picture");
+    }
+  }
+
   function getTimeAgo(timestamp: string): string {
     const now = new Date();
     const time = new Date(timestamp);
@@ -116,7 +137,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
       {/* Sidebar */}
       <div className="sidebar">
         <div className="user-section">
-          <div className="avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
           <div>
             <div className="user-name">{username}</div>
           </div>
@@ -227,10 +247,34 @@ export default function MainPage({ onLogout }: MainPageProps) {
           {currentView === "profile" && (
             <div className="profile-card">
               <div className="profile-top">
-                <div className="profile-avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
+                <div className="profile-avatar" style={{
+                  backgroundImage: profilePictureUrl ? `url(${profilePictureUrl})` : undefined,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: profilePictureUrl ? "transparent" : "#f97316",
+                  color: profilePictureUrl ? "transparent" : "white"
+                }}>
+                  {!profilePictureUrl && (username?.[0]?.toUpperCase() ?? "?")}
+                </div>
                 <div>
                   <h2 className="profile-name">{username}</h2>
-                  <button className="change-pic-btn">Change Profile Picture</button>
+                  <label style={{ display: "inline-block" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePictureUpload}
+                      style={{ display: "none" }}
+                    />
+                    <button 
+                      className="change-pic-btn"
+                      onClick={(e) => {
+                        const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                        input?.click();
+                      }}
+                    >
+                      Change Profile Picture
+                    </button>
+                  </label>
                 </div>
               </div>
               <div className="profile-stats">

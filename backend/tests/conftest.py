@@ -14,6 +14,7 @@ from database import Base
 from models.user import User
 from models.habit import Habit
 from models.notification import Notification
+from models.social import FriendRequest, FriendRequestStatus
 import bcrypt
 
 # Test database (in-memory SQLite)
@@ -36,6 +37,32 @@ def test_user(db):
     hashed_password = bcrypt.hashpw(b"test123", bcrypt.gensalt()).decode('utf-8')
     user = User(
         username="testuser",
+        hashed_password=hashed_password
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@pytest.fixture
+def test_user2(db):
+    """Create second test user"""
+    hashed_password = bcrypt.hashpw(b"test123", bcrypt.gensalt()).decode('utf-8')
+    user = User(
+        username="testuser2",
+        hashed_password=hashed_password
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@pytest.fixture
+def test_user3(db):
+    """Create third test user"""
+    hashed_password = bcrypt.hashpw(b"test123", bcrypt.gensalt()).decode('utf-8')
+    user = User(
+        username="testuser3",
         hashed_password=hashed_password
     )
     db.add(user)

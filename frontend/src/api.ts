@@ -378,3 +378,20 @@ export async function getAllHabitsHeatmap() {
   if (!res.ok) throw new Error("Failed to fetch global heatmap");
   return res.json();
 }
+
+// Profile Picture Upload
+export async function uploadProfilePicture(file: File): Promise<{ profile_picture_url: string }> {
+  const token = localStorage.getItem("token");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${BASE_URL}/users/upload-profile-picture`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to upload picture");
+  return data;
+}
