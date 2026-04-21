@@ -157,9 +157,12 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
 
   return (
     <>
-      <GlobalHabitHeatmap refreshKey={heatmapKey} />
 
       <div style={{ padding: "20px" }}>
+        <div style={{ marginBottom: "10px" }}>
+          <GlobalHabitHeatmap refreshKey={heatmapKey} />
+        </div>
+
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
           <h2>My Habits</h2>
           <button
