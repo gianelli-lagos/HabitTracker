@@ -424,3 +424,65 @@ body {
   background-color: #6D28D9;
   transform: translateY(-1px);
 }
+
+/* ============================================ */
+/* Heatmap Styles (Purple Theme) */
+/* ============================================ */
+
+.react-calendar-heatmap {
+  width: 100%;
+  height: auto;
+}
+
+.react-calendar-heatmap .react-calendar-heatmap-month-label {
+  font-size: 0.7rem;
+  fill: #666;
+}
+
+.react-calendar-heatmap .react-calendar-heatmap-weekday-label {
+  font-size: 0.65rem;
+  fill: #888;
+}
+
+.react-calendar-heatmap rect {
+  stroke: #fff;
+  stroke-width: 1;
+  rx: 2;
+}
+
+/* Empty (no logs) */
+.react-calendar-heatmap .color-empty {
+  fill: #f3f4f6;
+}
+
+/* 1 log - Light purple */
+.react-calendar-heatmap .color-scale-1 {
+  fill: #ddd6fe;
+}
+
+/* 2 logs - Medium purple */
+.react-calendar-heatmap .color-scale-2 {
+  fill: #c4b5fd;
+}
+
+/* 3+ logs - Dark purple */
+.react-calendar-heatmap .color-scale-3 {
+  fill: #8b5cf6;
+}
+
+.react-calendar-heatmap rect:hover {
+  stroke: #8b5cf6;
+  stroke-width: 2;
+}
+
+/* Tooltip styling */
+.react-calendar-heatmap-tooltip {
+  position: absolute;
+  background: #1f2937;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  pointer-events: none;
+  z-index: 999;
+}

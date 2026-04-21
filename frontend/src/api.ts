@@ -212,3 +212,13 @@ export async function getHabitLogs(id: number): Promise<HabitLog[]> {
   if (!res.ok) throw new Error("Failed to fetch habit logs");
   return res.json();
 }
+
+// Heatmap --
+export async function getAllHabitsHeatmap() {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/habits/logs/all`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error("Failed to fetch global heatmap");
+  return res.json();
+}

@@ -23,7 +23,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); 
 
   useEffect(() => {
@@ -115,14 +114,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
     <div className="layout">
       {/* Sidebar */}
       <div className="sidebar">
-        <div className="logo-section">
-          <span className="logo-icon">🌱</span>
-          <div>
-            <div className="logo-text">HabitFlow</div>
-            <div className="logo-sub">Build better habits</div>
-          </div>
-        </div>
-        
         <div className="user-section">
           <div className="avatar">{username?.[0]?.toUpperCase() ?? "?"}</div>
           <div>
@@ -162,22 +153,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
 
       {/* Main Content */}
       <div className="main">
-        {/* Top Banner */}
-        <div className="top-banner">
-          <div>
-            <h1 className="page-title">
-              {currentView === "habits" && "My Habits"}
-              {currentView === "notifications" && "Notifications"}
-              {currentView === "profile" && "Profile"}
-            </h1>
-            <p className="page-subtitle">
-              {currentView === "habits" && "Track your progress and stay motivated"}
-              {currentView === "notifications" && "Stay updated on your progress"}
-              {currentView === "profile" && "Manage your account settings"}
-            </p>
-          </div>
-        </div>
-
         <div className="content">
           {/* HABITS VIEW */}
           {currentView === "habits" && (
