@@ -60,11 +60,14 @@ def get_user_events(
     - is invited to (any status).
     Optionally restricted to a date range, based on event-time overlap.
     """
+    from sqlalchemy.orm import joinedload
+    
     start_dt, end_dt = _range_to_datetimes(start_date, end_date)
 
     query = (
         db.query(Event)
         .outerjoin(EventAttendee, EventAttendee.event_id == Event.id)
+        .options(joinedload(Event.attendees).joinedload(EventAttendee.user))
         .filter(or_(Event.creator_id == user_id, EventAttendee.user_id == user_id))
         .distinct()
     )
@@ -80,7 +83,9 @@ def get_user_events(
 
 def get_event_by_id(db: Session, event_id: int, user_id: int):
     """Return event if user is creator or attendee; otherwise 403."""
-    event = db.query(Event).filter(Event.id == event_id).first()
+    from sqlalchemy.orm import joinedload
+    
+    event = db.query(Event).options(joinedload(Event.attendees).joinedload(EventAttendee.user)).filter(Event.id == event_id).first()
     if not event:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
 
@@ -226,6 +231,71 @@ def respond_to_invite(db: Session, event_id: int, user_id: int, status_value: st
     db.commit()
     db.refresh(attendee)
     return attendee
+
+
+def update_event_invites(db: Session, event_id: int, creator_id: int, user_ids: Iterable[int]):
+    """
+    Update invites for an event: add/remove attendees to match the provided list.
+    Only the creator can do this.
+    - Keeps creator off the invite list (filters them out).
+    - Adds new users not currently invited.
+    - Removes users not in the new list (hard delete, not decline).
+    - Keeps existing invites with their current status.
+    Returns dict with added and removed user_ids.
+    """
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+    if event.creator_id != creator_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the creator can update invites",
+        )
+
+    # Normalize: remove creator, deduplicate
+    normalized_ids = {int(uid) for uid in user_ids if int(uid) != creator_id}
+
+    # Get current attendees
+    current = (
+        db.query(EventAttendee)
+        .filter(EventAttendee.event_id == event_id)
+        .all()
+    )
+    current_ids = {a.user_id for a in current}
+
+    # Determine adds and removes
+    to_add = normalized_ids - current_ids
+    to_remove = current_ids - normalized_ids
+
+    # Validate users to add exist
+    if to_add:
+        users = db.query(User).filter(User.id.in_(to_add)).all()
+        found_ids = {u.id for u in users}
+        missing = sorted(list(to_add - found_ids))
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Users not found: {missing}",
+            )
+
+    # Add new attendees
+    new_attendees = []
+    for uid in to_add:
+        attendee = EventAttendee(event_id=event_id, user_id=uid, status="invited")
+        db.add(attendee)
+        new_attendees.append(attendee)
+
+    # Remove attendees
+    if to_remove:
+        db.query(EventAttendee).filter(
+            and_(EventAttendee.event_id == event_id, EventAttendee.user_id.in_(to_remove))
+        ).delete(synchronize_session=False)
+
+    db.commit()
+    for row in new_attendees:
+        db.refresh(row)
+
+    return {"added": list(to_add), "removed": list(to_remove), "new_attendees": new_attendees}
 
 
 def get_event_attendees(db: Session, event_id: int, user_id: int):

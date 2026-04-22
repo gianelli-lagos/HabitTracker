@@ -13,8 +13,12 @@ import {
   getProfile,
   respondToInvite,
   updateEvent,
+  updateEventInvites,
+  getFriends,
+  getUserById,
   type Event,
   type EventAttendee,
+  type Friend,
 } from "../api";
 
 type EventForm = {
@@ -42,9 +46,12 @@ export default function CalendarPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [creatorUsername, setCreatorUsername] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<EventForm>(emptyForm);
-  const [pendingInviteUsers, setPendingInviteUsers] = useState("");
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedFriendIds, setSelectedFriendIds] = useState<Set<number>>(new Set());
+  const [friendSearchQuery, setFriendSearchQuery] = useState("");
 
   async function loadCalendarData(): Promise<Event[] | null> {
     setLoading(true);
@@ -110,9 +117,35 @@ export default function CalendarPage() {
       location: event.location ?? "",
     });
     setShowDetailModal(true);
+    // Fetch creator's username
+    getUserById(event.creator_id)
+      .then((user) => setCreatorUsername(user.username))
+      .catch((err) => {
+        console.error("Failed to fetch creator:", err);
+        setCreatorUsername("Unknown");
+      });
   }
 
-  function handleDateClick(arg: DateClickArg) {
+  async function handleStartEditing() {
+    // Initialize invites from current attendees and fetch friends list
+    if (selectedEvent) {
+      const invitedIds = new Set(
+        selectedEvent.attendees
+          ?.map((a) => a.user_id)
+          .filter((id) => id !== selectedEvent.creator_id) || []
+      );
+      setSelectedFriendIds(invitedIds);
+    }
+    try {
+      const friendsList = await getFriends();
+      setFriends(friendsList);
+    } catch (err) {
+      console.error("Failed to fetch friends:", err);
+    }
+    setIsEditing(true);
+  }
+
+  async function handleDateClick(arg: DateClickArg) {
     const start = `${arg.dateStr}T09:00`;
     const end = `${arg.dateStr}T10:00`;
     setForm({
@@ -120,6 +153,14 @@ export default function CalendarPage() {
       start_time: start,
       end_time: end,
     });
+    setSelectedFriendIds(new Set());
+    // Fetch friends list when opening modal
+    try {
+      const friendsList = await getFriends();
+      setFriends(friendsList);
+    } catch (err) {
+      console.error("Failed to fetch friends:", err);
+    }
     setShowCreateModal(true);
   }
 
@@ -139,10 +180,12 @@ export default function CalendarPage() {
         start_time: new Date(form.start_time).toISOString(),
         end_time: new Date(form.end_time).toISOString(),
         location: form.location.trim() || undefined,
-        invite_user_ids: [],
+        invite_user_ids: Array.from(selectedFriendIds),
       });
       setShowCreateModal(false);
       setForm(emptyForm);
+      setSelectedFriendIds(new Set());
+      setFriendSearchQuery("");
       await loadCalendarData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create event");
@@ -161,6 +204,10 @@ export default function CalendarPage() {
         end_time: new Date(form.end_time).toISOString(),
         location: form.location.trim() || undefined,
       });
+      
+      // Update invites if changed
+      await updateEventInvites(selectedEvent.id, Array.from(selectedFriendIds));
+      
       setSelectedEvent(updated);
       setIsEditing(false);
       await loadCalendarData();
@@ -203,7 +250,20 @@ export default function CalendarPage() {
     <div style={{ padding: "20px" }}>
       <div style={styles.headerRow}>
         <h2 style={{ margin: 0 }}>Calendar</h2>
-        <button className="new-habit-btn" onClick={() => setShowCreateModal(true)}>
+        <button 
+          className="new-habit-btn" 
+          onClick={async () => {
+            setForm(emptyForm);
+            setSelectedFriendIds(new Set());
+            try {
+              const friendsList = await getFriends();
+              setFriends(friendsList);
+            } catch (err) {
+              console.error("Failed to fetch friends:", err);
+            }
+            setShowCreateModal(true);
+          }}
+        >
           + New Event
         </button>
       </div>
@@ -302,7 +362,15 @@ export default function CalendarPage() {
       )}
 
       {showCreateModal && (
-        <div style={modalStyles.overlay}>
+        <div 
+          style={modalStyles.overlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowCreateModal(false);
+              setFriendSearchQuery("");
+            }
+          }}
+        >
           <div style={modalStyles.content}>
             <h3>Create Event</h3>
             <form onSubmit={handleCreateSubmit} style={styles.form}>
@@ -339,17 +407,130 @@ export default function CalendarPage() {
                 value={form.location}
                 onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
               />
-              <input
-                style={styles.input}
-                placeholder="Invite users (placeholder: teammate will connect social/friends)"
-                value={pendingInviteUsers}
-                onChange={(e) => setPendingInviteUsers(e.target.value)}
-              />
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: 600 }}>Invite Friends:</label>
+                {friends.length === 0 ? (
+                  <p style={{ color: "#888", fontSize: "0.9rem", margin: 0 }}>You don't have any friends yet</p>
+                ) : (
+                  <>
+                    {/* Search Input */}
+                    <input
+                      type="text"
+                      placeholder="Search friends..."
+                      value={friendSearchQuery}
+                      onChange={(e) => setFriendSearchQuery(e.target.value)}
+                      style={{
+                        ...styles.input,
+                        marginBottom: "8px",
+                        width: "100%",
+                      }}
+                    />
+
+                    {/* Selected Friends Tags */}
+                    {selectedFriendIds.size > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                        {Array.from(selectedFriendIds)
+                          .map((id) => friends.find((f) => f.id === id))
+                          .filter(Boolean)
+                          .map((friend) => (
+                            <span
+                              key={friend!.id}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                backgroundColor: "#7C3AED",
+                                color: "#fff",
+                                padding: "6px 12px",
+                                borderRadius: "16px",
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              {friend!.username}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newSet = new Set(selectedFriendIds);
+                                  newSet.delete(friend!.id);
+                                  setSelectedFriendIds(newSet);
+                                }}
+                                style={{
+                                  background: "none",
+                                  border: "none",
+                                  color: "#fff",
+                                  cursor: "pointer",
+                                  fontSize: "1.2rem",
+                                  padding: 0,
+                                  lineHeight: 1,
+                                }}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    )}
+
+                    {/* Friend List - Clickable */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      {friends
+                        .filter((friend) =>
+                          friend.username.toLowerCase().includes(friendSearchQuery.toLowerCase())
+                        )
+                        .map((friend) => (
+                          <button
+                            key={friend.id}
+                            type="button"
+                            onClick={() => {
+                              const newSet = new Set(selectedFriendIds);
+                              if (newSet.has(friend.id)) {
+                                newSet.delete(friend.id);
+                              } else {
+                                newSet.add(friend.id);
+                              }
+                              setSelectedFriendIds(newSet);
+                            }}
+                            style={{
+                              padding: "10px 12px",
+                              backgroundColor: selectedFriendIds.has(friend.id) ? "#7C3AED" : "#f9fafb",
+                              color: selectedFriendIds.has(friend.id) ? "#fff" : "#111",
+                              border: "1px solid #eee",
+                              borderRadius: "6px",
+                              cursor: "pointer",
+                              textAlign: "left",
+                              transition: "all 0.2s",
+                              fontWeight: selectedFriendIds.has(friend.id) ? 600 : 400,
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!selectedFriendIds.has(friend.id)) {
+                                e.currentTarget.style.backgroundColor = "#f0e6ff";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!selectedFriendIds.has(friend.id)) {
+                                e.currentTarget.style.backgroundColor = "#f9fafb";
+                              }
+                            }}
+                          >
+                            {friend.username}
+                          </button>
+                        ))}
+                    </div>
+                  </>
+                )}
+              </div>
               <div style={styles.btnRow}>
                 <button className="new-habit-btn" type="submit">
                   Save Event
                 </button>
-                <button type="button" style={styles.cancelBtn} onClick={() => setShowCreateModal(false)}>
+                <button 
+                  type="button" 
+                  style={styles.cancelBtn} 
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setFriendSearchQuery("");
+                  }}
+                >
                   Cancel
                 </button>
               </div>
@@ -396,6 +577,107 @@ export default function CalendarPage() {
                   onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
                   placeholder="Location"
                 />
+                <div style={{ marginBottom: "12px" }}>
+                  <label style={{ display: "block", marginBottom: "8px", fontWeight: 600 }}>Invite Friends:</label>
+                  {friends.length === 0 ? (
+                    <p style={{ color: "#888", fontSize: "0.9rem", margin: 0 }}>You don't have any friends yet</p>
+                  ) : (
+                    <>
+                      {/* Search Input */}
+                      <input
+                        type="text"
+                        placeholder="Search friends..."
+                        value={friendSearchQuery}
+                        onChange={(e) => setFriendSearchQuery(e.target.value)}
+                        style={{
+                          ...styles.input,
+                          marginBottom: "8px",
+                          width: "100%",
+                        }}
+                      />
+
+                      {/* Selected Friends Tags */}
+                      {selectedFriendIds.size > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+                          {Array.from(selectedFriendIds)
+                            .map((id) => friends.find((f) => f.id === id))
+                            .filter(Boolean)
+                            .map((friend) => (
+                              <span
+                                key={friend!.id}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  backgroundColor: "#7C3AED",
+                                  color: "#fff",
+                                  padding: "6px 12px",
+                                  borderRadius: "16px",
+                                  fontSize: "0.9rem",
+                                }}
+                              >
+                                {friend!.username}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newSet = new Set(selectedFriendIds);
+                                    newSet.delete(friend!.id);
+                                    setSelectedFriendIds(newSet);
+                                  }}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: "#fff",
+                                    cursor: "pointer",
+                                    fontSize: "1.2rem",
+                                    padding: 0,
+                                    lineHeight: 1,
+                                  }}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                        </div>
+                      )}
+
+                      {/* Friend List - Clickable */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        {friends
+                          .filter((friend) =>
+                            friend.username.toLowerCase().includes(friendSearchQuery.toLowerCase())
+                          )
+                          .map((friend) => (
+                            <button
+                              key={friend.id}
+                              type="button"
+                              onClick={() => {
+                                const newSet = new Set(selectedFriendIds);
+                                if (newSet.has(friend.id)) {
+                                  newSet.delete(friend.id);
+                                } else {
+                                  newSet.add(friend.id);
+                                }
+                                setSelectedFriendIds(newSet);
+                              }}
+                              style={{
+                                padding: "10px 12px",
+                                backgroundColor: selectedFriendIds.has(friend.id) ? "#7C3AED" : "#f9fafb",
+                                color: selectedFriendIds.has(friend.id) ? "#fff" : "#111",
+                                border: "1px solid #eee",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                textAlign: "left",
+                                fontSize: "0.95rem",
+                              }}
+                            >
+                              {friend.username}
+                            </button>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                </div>
                 <div style={styles.btnRow}>
                   <button className="new-habit-btn" type="submit">
                     Update
@@ -420,17 +702,50 @@ export default function CalendarPage() {
 
                 <div>
                   <strong>Attendees</strong>
-                  {selectedEvent.attendees?.length ? (
-                    <ul style={styles.attendeeList}>
-                      {selectedEvent.attendees.map((attendee: EventAttendee) => (
-                        <li key={`${attendee.user_id}-${attendee.id ?? "n/a"}`}>
-                          {attendee.user?.username ?? `User #${attendee.user_id}`} - {attendee.status}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p style={{ marginTop: "8px", color: "#777" }}>No attendees yet.</p>
-                  )}
+                  <div style={{ marginTop: "8px" }}>
+                    {/* Show Creator */}
+                    <p style={{ margin: "4px 0", fontSize: "0.95rem" }}>
+                      <span style={{ fontWeight: 600 }}>Organizer:</span> {creatorUsername || "Loading..."}
+                    </p>
+                    {/* Show Other Attendees */}
+                    {selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
+                      <>
+                        <p style={{ margin: "12px 0 8px 0", fontSize: "0.9rem", fontWeight: 600, color: "#555" }}>
+                          Organizer Friends Who Were Invited
+                        </p>
+                        <ul style={{ ...styles.attendeeList, marginTop: "4px" }}>
+                          {selectedEvent.attendees.map((attendee: EventAttendee) => (
+                            <li key={`${attendee.user_id}-${attendee.id ?? "n/a"}`}>
+                              <span>{attendee.user?.username ?? `User #${attendee.user_id}`}</span>
+                              <span
+                                style={{
+                                  marginLeft: "8px",
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "0.85rem",
+                                  fontWeight: 500,
+                                  backgroundColor:
+                                    attendee.status === "accepted"
+                                      ? "#dcfce7"
+                                      : attendee.status === "declined"
+                                      ? "#fee2e2"
+                                      : "#fef3c7",
+                                  color:
+                                    attendee.status === "accepted"
+                                      ? "#166534"
+                                      : attendee.status === "declined"
+                                      ? "#991b1b"
+                                      : "#92400e",
+                                }}
+                              >
+                                {attendee.status}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {!isCreator && myAttendeeRow && (
@@ -446,7 +761,7 @@ export default function CalendarPage() {
 
                 {isCreator && (
                   <div style={styles.btnRow}>
-                    <button className="new-habit-btn" onClick={() => setIsEditing(true)}>
+                    <button className="new-habit-btn" onClick={() => handleStartEditing()}>
                       Edit
                     </button>
                     <button style={styles.deleteBtn} onClick={handleDelete}>
@@ -462,6 +777,7 @@ export default function CalendarPage() {
                     onClick={() => {
                       setShowDetailModal(false);
                       setSelectedEvent(null);
+                      setCreatorUsername(null);
                     }}
                   >
                     Close

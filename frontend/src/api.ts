@@ -392,6 +392,34 @@ export async function respondToInvite(eventId: number, statusValue: "accepted" |
   }
 }
 
+export async function updateEventInvites(eventId: number, userIds: number[]): Promise<void> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/events/${eventId}/invites`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ user_ids: userIds }),
+  });
+
+  if (!res.ok) {
+    const payload = await res.json();
+    throw new Error(payload.detail || "Failed to update invites");
+  }
+}
+
+export async function getUserById(userId: number): Promise<UserProfile> {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${BASE_URL}/users/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to fetch user profile");
+  return data;
+}
+
 // Heatmap --
 export async function getAllHabitsHeatmap() {
   const token = localStorage.getItem("token");

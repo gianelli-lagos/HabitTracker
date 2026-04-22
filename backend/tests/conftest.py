@@ -15,7 +15,9 @@ from models.user import User
 from models.habit import Habit
 from models.notification import Notification
 from models.social import FriendRequest, FriendRequestStatus
+from models.event import Event, EventAttendee
 import bcrypt
+from datetime import datetime, timedelta
 
 # Test database (in-memory SQLite)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -84,3 +86,52 @@ def test_habit(db, test_user):
     db.commit()
     db.refresh(habit)
     return habit
+
+@pytest.fixture
+def test_event(db, test_user):
+    """Create test event"""
+    event = Event(
+        creator_id=test_user.id,
+        title="Test Event",
+        description="Test event description",
+        start_time=datetime.now() + timedelta(days=1),
+        end_time=datetime.now() + timedelta(days=1, hours=1),
+        location="Test Location"
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    return event
+
+@pytest.fixture
+def test_event_with_attendees(db, test_user, test_user2, test_user3):
+    """Create test event with invited attendees"""
+    event = Event(
+        creator_id=test_user.id,
+        title="Team Event",
+        description="Event with attendees",
+        start_time=datetime.now() + timedelta(days=2),
+        end_time=datetime.now() + timedelta(days=2, hours=2),
+        location="Conference Room"
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    
+    # Add attendees
+    attendee1 = EventAttendee(
+        event_id=event.id,
+        user_id=test_user2.id,
+        status="invited"
+    )
+    attendee2 = EventAttendee(
+        event_id=event.id,
+        user_id=test_user3.id,
+        status="accepted"
+    )
+    db.add(attendee1)
+    db.add(attendee2)
+    db.commit()
+    db.refresh(event)
+    
+    return event
