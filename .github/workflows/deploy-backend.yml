@@ -1,0 +1,42 @@
+name: Deploy Backend to AWS
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "backend/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+    
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+    
+    - name: Build and push to ECR
+      run: |
+        docker buildx build \
+          --platform linux/amd64 \
+          --push \
+          -t ${{ secrets.ECR_REPO_URI }}:latest \
+          ./backend
+    
+    - name: Deploy to ECS
+      run: |
+        aws ecs update-service \
+          --cluster habittracker-cluster \
+          --service habittracker-backend-service \
+          --region us-east-2 \
+          --force-new-deployment
+          --region us-east-2
