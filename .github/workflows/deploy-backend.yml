@@ -39,3 +39,4 @@ jobs:
           --service habittracker-backend-service \
           --region us-east-2 \
           --force-new-deployment
+          --region us-east-2
