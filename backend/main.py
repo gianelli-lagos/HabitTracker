@@ -28,7 +28,7 @@ def health():
 
 @app.get("/")
 def root():
-    return {"message": "HabitFlow API v2.0 - CD Works!"}
+    return {"message": "Welcome to HabitTracker API"}
 
 
 # ----------------------------
