@@ -6,7 +6,7 @@ import os
 # Use localhost when backend runs outside Docker
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
-    "postgresql://postgres:password@localhost:5432/habittracker"
+    "postgresql://postgres:password@localhost:5434/habittracker"
 )
 
 engine = create_engine(DATABASE_URL)

@@ -10,7 +10,7 @@ def get_db_session():
     # Try environment variable first, then use local default
     DATABASE_URL = os.getenv(
         "DATABASE_URL",
-        "postgresql://postgres:password@localhost:5433/habittracker"  # Local default
+        "postgresql://postgres:password@localhost:5434/habittracker"  # Local default
     )
     
     engine = create_engine(
