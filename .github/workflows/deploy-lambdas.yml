@@ -24,7 +24,17 @@ jobs:
     - name: Deploy daily_reminders
       run: |
         cd backend/lambdas/daily_reminders
+        cp -r ../shared .
+        cp -r ../../models .
+        cp ../../database.py .
+        cp -r ../../services .
         pip install -r requirements.txt -t .
+        rm -rf psycopg2 psycopg2_binary*
+        pip install psycopg2-binary \
+          --platform manylinux2014_aarch64 \
+          --target . \
+          --only-binary=:all: \
+          --python-version 3.11
         zip -r daily_reminders.zip .
         aws lambda update-function-code \
           --function-name daily_reminders \
@@ -34,7 +44,17 @@ jobs:
     - name: Deploy midnight_streak_validator
       run: |
         cd backend/lambdas/midnight_streak_validator
+        cp -r ../shared .
+        cp -r ../../models .
+        cp ../../database.py .
+        cp -r ../../services .
         pip install -r requirements.txt -t .
+        rm -rf psycopg2 psycopg2_binary*
+        pip install psycopg2-binary \
+          --platform manylinux2014_aarch64 \
+          --target . \
+          --only-binary=:all: \
+          --python-version 3.11
         zip -r midnight_streak_validator.zip .
         aws lambda update-function-code \
           --function-name midnight_streak_validator \
@@ -44,7 +64,17 @@ jobs:
     - name: Deploy weekly_summary
       run: |
         cd backend/lambdas/weekly_summary
+        cp -r ../shared .
+        cp -r ../../models .
+        cp ../../database.py .
+        cp -r ../../services .
         pip install -r requirements.txt -t .
+        rm -rf psycopg2 psycopg2_binary*
+        pip install psycopg2-binary \
+          --platform manylinux2014_aarch64 \
+          --target . \
+          --only-binary=:all: \
+          --python-version 3.11
         zip -r weekly_summary.zip .
         aws lambda update-function-code \
           --function-name weekly_summary \
@@ -54,7 +84,17 @@ jobs:
     - name: Deploy test_notification
       run: |
         cd backend/lambdas/test_notification
+        cp -r ../shared .
+        cp -r ../../models .
+        cp ../../database.py .
+        cp -r ../../services .
         pip install -r requirements.txt -t .
+        rm -rf psycopg2 psycopg2_binary*
+        pip install psycopg2-binary \
+          --platform manylinux2014_aarch64 \
+          --target . \
+          --only-binary=:all: \
+          --python-version 3.11
         zip -r test_notification.zip .
         aws lambda update-function-code \
           --function-name test_notification \
