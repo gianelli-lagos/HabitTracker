@@ -58,6 +58,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
+        "http://habittracker-alb-444145518.us-east-2.elb.amazonaws.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
