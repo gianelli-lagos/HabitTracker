@@ -60,6 +60,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://habittracker-alb-444145518.us-east-2.elb.amazonaws.com",
         "https://habittracker-io.vercel.app",
+        "http://habittracker-io.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],

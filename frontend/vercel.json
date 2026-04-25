@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://habittracker-alb-444145518.us-east-2.elb.amazonaws.com/:path*"
+    }
+  ]
+}
