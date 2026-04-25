@@ -18,12 +18,12 @@ from services.notification_service import create_notification
 
 def lambda_handler(event, context):
     """
-    Runs Sunday 8:00 PM UTC
+    Runs Sunday 8:00 PM EDT
     
     Generates weekly summary for each user
     Shows: habits completed, completion rate, longest streak
     
-    For testing: pass event = {"test_user_id": 3} to only send to one user
+    For testing: pass event = {"test_user_id": 1} to only send to one user
     """
     log_info("Starting weekly summary generation")
     

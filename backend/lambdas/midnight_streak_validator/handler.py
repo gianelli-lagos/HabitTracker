@@ -17,7 +17,7 @@ from services.notification_service import create_notification
 
 def lambda_handler(event, context):
     """
-    Runs at midnight (12:00 AM UTC)
+    Runs at midnight (12:00 AM EDT)
     
     Checks all habits with active streaks
     If habit was NOT logged today, resets streak to 0

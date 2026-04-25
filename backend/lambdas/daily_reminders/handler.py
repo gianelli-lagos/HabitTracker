@@ -17,7 +17,7 @@ from services.notification_service import create_notification
 
 def lambda_handler(event, context):
     """
-    Runs at 9:00 AM UTC daily
+    Runs at 9:00 AM EDT daily
     
     Finds habits that haven't been logged today
     Creates reminder notifications
