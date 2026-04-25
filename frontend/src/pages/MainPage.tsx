@@ -33,14 +33,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      fetch("http://localhost:8000/auth/profile", {
+      fetch("/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
         .then((data: User) => {
           setUsername(data.username);
           if (data.profile_picture_url) {
-            setProfilePictureUrl(`http://localhost:8000${data.profile_picture_url}`);
+            setProfilePictureUrl(`/api${data.profile_picture_url}`);
           }
         })
         .catch(err => console.error("Profile fetch error:", err));
@@ -101,7 +101,7 @@ export default function MainPage({ onLogout }: MainPageProps) {
 
     try {
       const result = await uploadProfilePicture(file);
-      setProfilePictureUrl(`http://localhost:8000${result.profile_picture_url}`);
+      setProfilePictureUrl(`/api${result.profile_picture_url}`);
     } catch (error) {
       console.error("Upload failed:", error);
       alert("Failed to upload profile picture");
