@@ -98,7 +98,7 @@ export interface SearchUser {
 
 
 
-const BASE_URL = "http://habittracker-alb-444145518.us-east-2.elb.amazonaws.com";
+const BASE_URL = "/api";
 
 export async function registerUser(username: string, password: string) {
   const res = await fetch(`${BASE_URL}/auth/register`, {
