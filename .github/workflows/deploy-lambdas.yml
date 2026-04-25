@@ -1,0 +1,62 @@
+name: Deploy Lambda Functions
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "backend/lambdas/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Deploy daily_reminders
+      run: |
+        cd backend/lambdas/daily_reminders
+        pip install -r requirements.txt -t .
+        zip -r daily_reminders.zip .
+        aws lambda update-function-code \
+          --function-name daily_reminders \
+          --zip-file fileb://daily_reminders.zip \
+          --region us-east-2
+
+    - name: Deploy midnight_streak_validator
+      run: |
+        cd backend/lambdas/midnight_streak_validator
+        pip install -r requirements.txt -t .
+        zip -r midnight_streak_validator.zip .
+        aws lambda update-function-code \
+          --function-name midnight_streak_validator \
+          --zip-file fileb://midnight_streak_validator.zip \
+          --region us-east-2
+
+    - name: Deploy weekly_summary
+      run: |
+        cd backend/lambdas/weekly_summary
+        pip install -r requirements.txt -t .
+        zip -r weekly_summary.zip .
+        aws lambda update-function-code \
+          --function-name weekly_summary \
+          --zip-file fileb://weekly_summary.zip \
+          --region us-east-2
+
+    - name: Deploy test_notification
+      run: |
+        cd backend/lambdas/test_notification
+        pip install -r requirements.txt -t .
+        zip -r test_notification.zip .
+        aws lambda update-function-code \
+          --function-name test_notification \
+          --zip-file fileb://test_notification.zip \
+          --region us-east-2
