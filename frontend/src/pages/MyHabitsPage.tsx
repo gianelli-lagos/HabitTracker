@@ -41,7 +41,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
 
   async function fetchHabits() {
     try {
-      const res = await fetch("http://localhost:8000/habits", {
+      const res = await fetch("/api/habits", {
         headers: { "Authorization": `Bearer ${token}` },
       });
       const data = await res.json();
@@ -53,7 +53,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
         const logStatus: Record<number, boolean> = {};
 
         for (const habit of data) {
-          const statsRes = await fetch(`http://localhost:8000/habits/${habit.id}/stats`, {
+          const statsRes = await fetch(`/api/habits/${habit.id}/stats`, {
             headers: { "Authorization": `Bearer ${token}` },
           });
           if (statsRes.ok) {
@@ -91,8 +91,8 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
 
     const method = editingId ? "PUT" : "POST";
     const url = editingId 
-      ? `http://localhost:8000/habits/${editingId}?name=${encodeURIComponent(name)}&description=${encodeURIComponent(description)}`
-      : `http://localhost:8000/habits?name=${encodeURIComponent(name)}&description=${encodeURIComponent(description)}`;
+      ? `/api/habits/${editingId}?name=${encodeURIComponent(name)}&description=${encodeURIComponent(description)}`
+      : `/api/habits?name=${encodeURIComponent(name)}&description=${encodeURIComponent(description)}`;
 
     try {
       const res = await fetch(url, {
@@ -121,7 +121,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
       const today = new Date();
       const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-      const res = await fetch(`http://localhost:8000/habits/${habitId}/log?log_date=${localDate}`, {
+      const res = await fetch(`/api/habits/${habitId}/log?log_date=${localDate}`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` },
       });
@@ -138,7 +138,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
   async function handleDelete(habitId: number) {
     if (!window.confirm("Are you sure you want to delete this habit?")) return;
     try {
-      const res = await fetch(`http://localhost:8000/habits/${habitId}`, {
+      const res = await fetch(`/api/habits/${habitId}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` },
       });

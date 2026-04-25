@@ -143,7 +143,7 @@ export default function SocialPage() {
               <div key={user.id} className="search-result-item">
                 <div className="result-avatar" style={{
                   backgroundImage: user.profile_picture_url 
-                    ? `url(http://localhost:8000${user.profile_picture_url})` 
+                    ? `url(/api${user.profile_picture_url})` 
                     : undefined,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
@@ -185,7 +185,7 @@ export default function SocialPage() {
                 <div className="pending-header">
                   <div className="pending-avatar" style={{
                     backgroundImage: req.sender.profile_picture_url 
-                      ? `url(http://localhost:8000${req.sender.profile_picture_url})` 
+                      ? `url(/api${req.sender.profile_picture_url})` 
                       : undefined,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -231,7 +231,7 @@ export default function SocialPage() {
               <div key={friend.id} className="friend-item">
                 <div className="friend-avatar" style={{
                   backgroundImage: friend.profile_picture_url
-                    ? `url(http://localhost:8000${friend.profile_picture_url})`
+                    ? `url(/api${friend.profile_picture_url})`
                     : undefined,
                   backgroundSize: "cover",
                   backgroundPosition: "center",
