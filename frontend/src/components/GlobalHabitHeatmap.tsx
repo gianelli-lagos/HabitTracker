@@ -42,7 +42,7 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
     const [year, month, day] = v.date.split('-').map(Number);
     return {
       ...v,
-      date: new Date(year, month - 1, day + 1)
+      date: new Date(year, month - 1, day)
     };
   });
 
