@@ -36,6 +36,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
     success_rate: 0,
     longest_streak: 0
   });
+  const fetchStats = async () => {
+    try {
+      const data = await getUserStats();
+      setStats(data);
+    } catch (err) {
+      console.error("Stats error:", err);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -80,6 +88,12 @@ export default function MainPage({ onLogout }: MainPageProps) {
       getUserStats()
         .then(data => setStats(data))
         .catch(err => console.error("Stats error:", err));
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    if (currentView === "profile") {
+      fetchStats();
     }
   }, [currentView]);
 
@@ -226,6 +240,7 @@ export default function MainPage({ onLogout }: MainPageProps) {
             <MyHabitsPage 
               externalOpenModal={isCreateModalOpen} 
               onModalClose={() => setIsCreateModalOpen(false)} 
+              onHabitActivity={fetchStats}
             />
           )}
           
