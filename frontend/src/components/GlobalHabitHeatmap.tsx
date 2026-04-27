@@ -38,11 +38,14 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
   const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
 
-  // Fix timezone offset shifting dates back one day
-  const adjustedValues = values.map(v => ({
-    ...v,
-    date: new Date(v.date + 'T12:00:00').toISOString().split('T')[0]
-  }));
+  // Shift date forward by 1 day to fix timezone offset in react-calendar-heatmap
+  const adjustedValues = values.map(v => {
+    const [year, month, day] = v.date.split('-').map(Number);
+    return {
+      ...v,
+      date: new Date(year, month - 1, day + 1)
+    };
+  });
 
   return (
     <div style={{ marginBottom: "25px" }}>
