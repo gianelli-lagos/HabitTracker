@@ -34,3 +34,33 @@ Thumbs.db
 
 test_lambda.py
 create_test_data.py
+
+
+AWSCLIV2.pkg
+
+# Lambda packaging artifacts
+backend/lambdas/**/*.zip
+backend/lambdas/**/psycopg2/
+backend/lambdas/**/psycopg2_binary*/
+backend/lambdas/**/sqlalchemy/
+backend/lambdas/**/SQLAlchemy*/
+backend/lambdas/**/typing_extensions*
+backend/lambdas/**/*.dist-info/
+backend/lambdas/**/bin/
+backend/lambdas/**/lib/
+../daily_reminders/database.py
+../daily_reminders/models/
+../daily_reminders/services/
+../daily_reminders/shared/
+../midnight_streak_validator/database.py
+../midnight_streak_validator/models/
+../midnight_streak_validator/services/
+../midnight_streak_validator/shared/
+database.py
+models/
+services/
+shared/
+../weekly_summary/database.py
+../weekly_summary/models/
+../weekly_summary/services/
+../weekly_summary/shared/
