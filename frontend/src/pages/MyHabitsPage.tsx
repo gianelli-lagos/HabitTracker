@@ -29,7 +29,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
   const [loggedToday, setLoggedToday] = useState<Record<number, boolean>>({});
   const token = localStorage.getItem("token");
 
-  // Sync with Sidebar "+ New Habit" button
+  // New Habit button
   useEffect(() => {
     if (externalOpenModal) {
       setEditingId(null);

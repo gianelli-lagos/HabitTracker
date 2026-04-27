@@ -27,6 +27,12 @@ export interface HabitLog {
   logged_at: string;
 }
 
+export interface UserStats {
+  total_habits: number;
+  success_rate: number;
+  longest_streak: number;
+}
+
 export interface UserProfile {
   id: number;
   username: string;
@@ -280,6 +286,18 @@ export async function getHabitLogs(id: number): Promise<HabitLog[]> {
 
   if (!res.ok) throw new Error("Failed to fetch habit logs");
   return res.json();
+}
+
+export async function getUserStats(): Promise<UserStats> {
+  const token = localStorage.getItem("token");
+  const response = await fetch("/api/habits/stats", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch stats");
+  return response.json();
 }
 
 // ----------------------------------------------------------------------------------

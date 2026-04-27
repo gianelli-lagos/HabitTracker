@@ -13,7 +13,7 @@ export default function App() {
   return (
     <div>
       <nav style={styles.nav}>
-        <span style={styles.brand}>🌱 HabitFlow</span>
+        <span style={styles.brand}>🌱 HabitTracker</span>
       </nav>
       <MainPage onLogout={() => setLoggedIn(false)} />
     </div>
