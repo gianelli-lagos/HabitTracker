@@ -12,10 +12,10 @@ interface Habit {
 interface MyHabitsPageProps {
   externalOpenModal?: boolean;
   onModalClose?: () => void;
+  onHabitActivity?: () => void;
 }
 
-export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabitsPageProps) {
-  const [habits, setHabits] = useState<Habit[]>([]);
+export default function MyHabitsPage({ externalOpenModal, onModalClose, onHabitActivity }: MyHabitsPageProps) {  const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [heatmapKey, setHeatmapKey] = useState(0);
@@ -102,6 +102,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
 
       if (res.ok) {
         setMessage(editingId ? "✅ Habit updated!" : "✅ Habit created!");
+        onHabitActivity?.();
         setTimeout(() => {
           handleCloseModal();
           fetchHabits();
@@ -129,6 +130,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
         setLoggedToday(prev => ({ ...prev, [habitId]: true }));
         fetchHabits();
         setHeatmapKey(prev => prev + 1);
+        onHabitActivity?.();
       }
     } catch (err) {
       console.error("Log error:", err);
@@ -142,7 +144,10 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` },
       });
-      if (res.ok) fetchHabits();
+      if (res.ok) {
+        fetchHabits();
+        onHabitActivity?.();
+      }
     } catch (err) {
       console.error("Delete error:", err);
     }
