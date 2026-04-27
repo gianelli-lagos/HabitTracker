@@ -12,9 +12,10 @@ interface Habit {
 interface MyHabitsPageProps {
   externalOpenModal?: boolean;
   onModalClose?: () => void;
+  onHabitActivity?: () => void;
 }
 
-export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabitsPageProps) {
+export default function MyHabitsPage({ externalOpenModal, onModalClose, onHabitActivity}: MyHabitsPageProps) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -102,6 +103,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
 
       if (res.ok) {
         setMessage(editingId ? "✅ Habit updated!" : "✅ Habit created!");
+        onHabitActivity?.();
         setTimeout(() => {
           handleCloseModal();
           fetchHabits();
@@ -132,6 +134,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
       }
     } catch (err) {
       console.error("Log error:", err);
+      onHabitActivity?.();
     }
   }
 
@@ -143,6 +146,7 @@ export default function MyHabitsPage({ externalOpenModal, onModalClose }: MyHabi
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (res.ok) fetchHabits();
+      onHabitActivity?.();
     } catch (err) {
       console.error("Delete error:", err);
     }
