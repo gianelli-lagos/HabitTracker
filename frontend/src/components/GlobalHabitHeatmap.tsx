@@ -34,8 +34,9 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
     return <p style={{ fontSize: "0.85rem", color: "#888" }}>Loading activity...</p>;
   }
 
-  const endDate = new Date();
-  const startDate = new Date();
+  const today = new Date();
+  const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
   startDate.setDate(startDate.getDate() - 365);
 
   return (
@@ -55,7 +56,7 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
         }}
         tooltipDataAttrs={(value: any) => {
           if (!value || !value.date) return {};
-          const date = new Date(value.date + 'T00:00:00').toLocaleDateString(
+          const date = new Date(value.date + 'T12:00:00').toLocaleDateString(
             'en-US',
             { month: 'short', day: 'numeric', year: 'numeric' }
           );
