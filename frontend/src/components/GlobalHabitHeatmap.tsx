@@ -38,6 +38,12 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
   const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
 
+  // Fix timezone offset shifting dates back one day
+  const adjustedValues = values.map(v => ({
+    ...v,
+    date: new Date(v.date + 'T12:00:00').toISOString().split('T')[0]
+  }));
+
   return (
     <div style={{ marginBottom: "25px" }}>
       <h3 style={{ marginBottom: "8px" }}>
@@ -46,7 +52,7 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
       <CalendarHeatmap
         startDate={startDate}
         endDate={endDate}
-        values={values}
+        values={adjustedValues}
         classForValue={(value) => {
           if (!value || value.count === 0) return "color-empty";
           if (value.count === 1) return "color-scale-1";
