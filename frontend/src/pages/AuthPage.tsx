@@ -35,7 +35,7 @@ async function handleSubmit(e: React.FormEvent) {
 return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.logo}>🌱 HabitFlow</h1>
+        <h1 style={styles.logo}>🌱 HabitTracker</h1>
         <p style={styles.tagline}>Build better habits</p>
         <h2 style={styles.title}>
           {mode === "login" ? "Welcome back" : "Create account"}

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from fastapi import HTTPException, status
 from datetime import date
 
@@ -140,3 +140,34 @@ def getHabitLogs(
         query = query.filter(HabitLog.date <= end_date)
 
     return query.order_by(HabitLog.date.desc()).all()
+
+def getUserStats(db: Session, user_id: int):
+    # toal active habits
+    habits = db.query(Habit).filter(Habit.user_id == user_id, Habit.is_active == True).all()
+    total_habits = len(habits)
+    if total_habits == 0:
+        return {
+            "total_habits": 0,
+            "success_rate": 0,
+            "longest_streak": 0
+        }
+    # longest streak 
+    longest_streak = max([h.longest_streak for h in habits])
+
+    # success rate
+    # Total Logs / Total Days since each habit was created
+    total_logs = db.query(HabitLog).filter(HabitLog.user_id == user_id).count()
+    
+    total_possible_days = 0
+    for habit in habits:
+        # Calculate days from creation until today
+        delta = (date.today() - habit.created_at.date()).days + 1
+        total_possible_days += max(1, delta) # minimum one day
+
+    success_rate = (total_logs / total_possible_days) * 100
+
+    return {
+        "total_habits": total_habits,
+        "success_rate": round(min(success_rate, 100), 1), # Cap at 100%
+        "longest_streak": longest_streak
+    }

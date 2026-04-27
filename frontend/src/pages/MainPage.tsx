@@ -4,8 +4,10 @@ import {
   getNotifications, 
   getUnreadCount, 
   markAsRead as markNotificationAsRead,
-  uploadProfilePicture
+  uploadProfilePicture,
+  getUserStats,
 } from "../api";
+import type { UserStats } from "../api";
 import type { Notification } from "../api";
 import MyHabitsPage from "./MyHabitsPage";
 import CalendarPage from "./CalendarPage";
@@ -29,6 +31,11 @@ export default function MainPage({ onLogout }: MainPageProps) {
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); 
+  const [stats, setStats] = useState<UserStats>({
+    total_habits: 0,
+    success_rate: 0,
+    longest_streak: 0
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -67,6 +74,14 @@ export default function MainPage({ onLogout }: MainPageProps) {
     const interval = setInterval(fetchUnreadCountFromAPI, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (currentView === "profile") {
+      getUserStats()
+        .then(data => setStats(data))
+        .catch(err => console.error("Stats error:", err));
+    }
+  }, [currentView]);
 
   async function fetchNotifications() {
     setLoadingNotifications(true);
@@ -287,15 +302,21 @@ export default function MainPage({ onLogout }: MainPageProps) {
               </div>
               <div className="profile-stats">
                 <div className="stat">
-                  <span style={{color: "#7C3AED", fontSize: "1.8rem", fontWeight: 700}}>0</span>
+                  <span style={{color: "#7C3AED", fontSize: "1.8rem", fontWeight: 700}}>
+                    {stats.total_habits}
+                  </span>
                   <p>Total Habits</p>
                 </div>
                 <div className="stat">
-                  <span style={{color: "#22c55e", fontSize: "1.8rem", fontWeight: 700}}>0%</span>
+                  <span style={{color: "#22c55e", fontSize: "1.8rem", fontWeight: 700}}>
+                    {stats.success_rate}%
+                  </span>
                   <p>Success Rate</p>
                 </div>
                 <div className="stat">
-                  <span style={{color: "#f97316", fontSize: "1.8rem", fontWeight: 700}}>0</span>
+                  <span style={{color: "#f97316", fontSize: "1.8rem", fontWeight: 700}}>
+                    {stats.longest_streak}
+                  </span>
                   <p>Longest Streak</p>
                 </div>
               </div>
@@ -312,3 +333,4 @@ export default function MainPage({ onLogout }: MainPageProps) {
     </div>    
   );
 }
+

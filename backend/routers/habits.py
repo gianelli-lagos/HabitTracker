@@ -15,7 +15,8 @@ from services.habit_service import (
     updateHabit,
     deleteHabit,
     logHabit,
-    getHabitLogs
+    getHabitLogs, 
+    getUserStats
 )
 from services.notification_service import create_notification
 
@@ -175,8 +176,10 @@ def get_habit_stats(
     }
 
 
-
-
+@router.get("/stats")
+def read_user_stats(
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return getUserStats(db, user_id=current_user.id)
 
 
 
