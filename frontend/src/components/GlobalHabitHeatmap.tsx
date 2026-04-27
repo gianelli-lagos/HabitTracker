@@ -35,7 +35,7 @@ export default function GlobalHabitHeatmap({ refreshKey }: Props) {
   }
 
   const today = new Date();
-  const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365);
 
   const adjustedValues = values.map(v => {
