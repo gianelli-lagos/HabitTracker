@@ -482,6 +482,14 @@ body {
   font-weight: 600;
 }
 
+/* Ensure week/day (timeGrid) uses the same readable dark-purple text */
+.fc .fc-timegrid-event .fc-event-main,
+.fc .fc-timegrid-event .fc-event-main-frame,
+.fc .fc-timegrid-event .fc-event-time,
+.fc .fc-timegrid-event .fc-event-title {
+  color: #5b21b6 !important;
+}
+
 .fc .fc-event.event-declined {
   opacity: 0.75;
   text-decoration: line-through;
