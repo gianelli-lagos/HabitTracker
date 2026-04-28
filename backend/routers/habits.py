@@ -67,6 +67,11 @@ def get_habits(
 ):
     return getUserHabits(db, current_user.id, active_only)
 
+@router.get("/stats")
+def read_user_stats(
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return getUserStats(db, user_id=current_user.id)
+
 
 #GET    /habits/{id}   Get single habit
 @router.get("/{habit_id}")
@@ -174,12 +179,6 @@ def get_habit_stats(
         "total_logs": total_logs,
         "last_logged_date": last_logged_date
     }
-
-
-@router.get("/stats")
-def read_user_stats(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return getUserStats(db, user_id=current_user.id)
 
 
 

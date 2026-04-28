@@ -85,14 +85,6 @@ export default function MainPage({ onLogout }: MainPageProps) {
 
   useEffect(() => {
     if (currentView === "profile") {
-      getUserStats()
-        .then(data => setStats(data))
-        .catch(err => console.error("Stats error:", err));
-    }
-  }, [currentView]);
-
-  useEffect(() => {
-    if (currentView === "profile") {
       fetchStats();
     }
   }, [currentView]);
