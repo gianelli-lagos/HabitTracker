@@ -46,6 +46,10 @@ def get_all_logs(
         for r in results
     ]
 
+@router.get("/stats")
+def read_user_stats(
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return getUserStats(db, user_id=current_user.id)
 
 #POST   /habits   Create new habit
 @router.post("")
@@ -66,11 +70,6 @@ def get_habits(
     db: Session = Depends(get_db)
 ):
     return getUserHabits(db, current_user.id, active_only)
-
-@router.get("/stats")
-def read_user_stats(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return getUserStats(db, user_id=current_user.id)
 
 
 #GET    /habits/{id}   Get single habit
