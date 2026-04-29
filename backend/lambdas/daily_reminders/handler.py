@@ -12,48 +12,68 @@ sys.path.append(project_root)
 
 from shared.db_connection import get_db_session
 from shared.logger import log_info, log_error
+from models.user import User
 from models.habit import Habit, HabitLog
 from services.notification_service import create_notification
 
+
 def lambda_handler(event, context):
     """
-    Runs at 9:00 AM EDT daily
-    
-    Finds habits that haven't been logged today
-    Creates reminder notifications
+    Daily Habit Reminder Lambda
+    Runs at 9:00 AM EDT
+    Sends reminder if a habit has NOT been logged today
     """
-    log_info("Starting daily habit reminders")
-    
+
+    log_info('Starting daily habit reminders')
+
     try:
         db = get_db_session()
         today = date.today()
+
         reminder_count = 0
-        
-        # Get all active habits
-        habits = db.query(Habit).filter(Habit.is_active == True).all()
-        
-        log_info(f"Checking {len(habits)} active habits")
-        
-        for habit in habits:
-            # Check if already logged today
-            logged_today = db.query(HabitLog).filter(
-                HabitLog.habit_id == habit.id,
-                HabitLog.date == today
-            ).first()
-            
-            if not logged_today:
-                # Not logged yet - send reminder
+        user_count = 0
+
+        # Get all users
+        users = db.query(User).all()
+
+        log_info(f'Total users found: {len(users)}')
+
+        for user in users:
+            user_count += 1
+
+            # Get habits per user
+            habits = db.query(Habit).filter(
+                Habit.user_id == user.id
+            ).all()
+
+            log_info(f'User {user.id} has {len(habits)} habits')
+
+            for habit in habits:
+
+                # Check if habit already logged today
+                logged_today = db.query(HabitLog).filter(
+                    HabitLog.habit_id == habit.id,
+                    HabitLog.date == today
+                ).first()
+
+                if logged_today:
+                    log_info(f'Skipping habit {habit.id} (already logged today)')
+                    continue
+
+                # Send reminder
                 reminder_count += 1
-                
-                # Create motivational message with current streak
+
                 if habit.current_streak > 0:
-                    message = f"You haven't logged {habit.name} yet today. Keep your {habit.current_streak}-day streak going!"
+                    message = (
+                        f"You haven't logged {habit.name} yet today. "
+                        f"Keep your {habit.current_streak}-day streak going!"
+                    )
                 else:
                     message = f"Don't forget to log {habit.name} today!"
-                
+
                 create_notification(
                     db=db,
-                    user_id=habit.user_id,
+                    user_id=user.id,
                     type='habit_reminder',
                     title=f'Time for {habit.name}! 🌱',
                     message=message,
@@ -63,34 +83,34 @@ def lambda_handler(event, context):
                         'current_streak': habit.current_streak
                     }
                 )
-                
+
                 log_info(
-                    "Reminder created",
-                    habit_id=habit.id,
-                    user_id=habit.user_id
+                    'Reminder created',
+                    user_id=user.id,
+                    habit_id=habit.id
                 )
-        
+
+        db.commit()
         db.close()
-        
+
         log_info(
-            "Daily reminders complete",
-            total_habits=len(habits),
+            'Daily reminders complete',
+            users_checked=user_count,
             reminders_sent=reminder_count
         )
-        
+
         return {
             'statusCode': 200,
             'body': {
                 'message': 'Daily reminders sent',
-                'habits_checked': len(habits),
+                'users_checked': user_count,
                 'reminders_sent': reminder_count
             }
         }
-        
+
     except Exception as e:
-        log_error("Daily reminders failed", e)
+        log_error('Daily reminders failed', e)
         return {
             'statusCode': 500,
             'body': {'error': str(e)}
         }
-    
