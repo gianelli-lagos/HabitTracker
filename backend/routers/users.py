@@ -3,13 +3,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
 from routers.auth import oauth2_scheme, get_current_user
-import os
-import shutil
+from services.s3_service import upload_profile_picture, delete_profile_picture, get_profile_picture_url
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.get("/{user_id}")
@@ -25,30 +21,45 @@ def get_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    return {"id": user.id, "username": user.username}
+    
+    # Get fresh presigned URL if profile picture exists
+    profile_picture_url = None
+    if user.profile_picture_url:
+        profile_picture_url = get_profile_picture_url(user.id)
+    
+    return {
+        "id": user.id,
+        "username": user.username,
+        "profile_picture_url": profile_picture_url
+    }
 
 
 @router.post("/upload-profile-picture")
-async def upload_profile_picture(
+async def upload_profile_picture_endpoint(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Upload profile picture for the current user"""
+    """Upload profile picture for the current user to S3"""
     try:
-        # Save file
-        filename = f"{current_user.id}_{file.filename}"
-        filepath = os.path.join(UPLOAD_DIR, filename)
+        # Read file content
+        contents = await file.read()
         
-        with open(filepath, "wb") as buffer:
-            contents = await file.read()
-            buffer.write(contents)
+        # Delete old profile picture if exists
+        delete_profile_picture(current_user.id)
         
-        # Update user record
-        file_url = f"/uploads/{filename}"
-        current_user.profile_picture_url = file_url
+        # Upload to S3 (returns presigned URL for immediate use)
+        presigned_url = upload_profile_picture(
+            file_content=contents,
+            user_id=current_user.id,
+            filename=file.filename
+        )
+        
+        # Store a marker that profile picture exists
+        # Generate fresh presigned URL on-demand when needed
+        current_user.profile_picture_url = "s3"
         db.commit()
         
-        return {"profile_picture_url": file_url}
+        return {"profile_picture_url": presigned_url, "message": "Profile picture uploaded successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -113,8 +113,14 @@ export async function registerUser(username: string, password: string) {
     body: JSON.stringify({ username, password }),
   });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || "Failed to Register");
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    throw new Error(`Server error: ${res.statusText || "Unknown error"}`);
+  }
+  
+  if (!res.ok) throw new Error(data.detail || "Failed to register");
   return data;
 }
 export async function loginUser(username: string, password: string) {

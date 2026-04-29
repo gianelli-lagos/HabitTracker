@@ -19,6 +19,8 @@ services:
       SECRET_KEY: supersecretkey
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
     depends_on:
