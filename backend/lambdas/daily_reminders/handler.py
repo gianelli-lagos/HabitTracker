@@ -15,6 +15,11 @@ from services.notification_service import create_notification
 
 
 def lambda_handler(event, context):
+    """
+    Daily Habit Reminder Lambda
+    Runs at 9:00 AM EDT
+    Sends reminder if a habit has NOT been logged today
+    """
     log_info("Starting daily habit reminders")
     db = None
     try:
