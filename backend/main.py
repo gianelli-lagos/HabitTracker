@@ -45,7 +45,7 @@ def startup():
 # ----------------------------
 # STATIC FILES
 # ----------------------------
-# Note: Profile pictures are now served from S3 via presigned URLs
+# Profile pictures are now served from S3 via presigned URLs
 # Remove local static file serving to ensure all images come from S3
 
 
