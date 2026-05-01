@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from database import engine, Base
 from routers import auth, notifications, habits, events, users, social
@@ -46,8 +45,8 @@ def startup():
 # ----------------------------
 # STATIC FILES
 # ----------------------------
-os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+# Note: Profile pictures are now served from S3 via presigned URLs
+# Remove local static file serving to ensure all images come from S3
 
 
 # ----------------------------
