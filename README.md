@@ -28,7 +28,7 @@ Built as a modern cloud-based application, HabitTracker combines personal produc
 **Frontend:** React, TypeScript, Chart.js, React Calendar Heatmap, Vercel  
 **Backend:** FastAPI, Python, REST APIs, JWT Authentication  
 **Database:** PostgreSQL  
-**Cloud & DevOps:** Docker, GitHub Actions, AWS RDS, AWS S3, AWS Lambda, AWS EventBridge, AWS CloudWatch
+**Cloud & DevOps:** Docker, GitHub Actions, AWS RDS, AWS Lambda, AWS EventBridge, AWS CloudWatch
 
 ---
 
@@ -37,7 +37,6 @@ Built as a modern cloud-based application, HabitTracker combines personal produc
 HabitTracker uses a cloud-native AWS architecture designed for scalability, automation, and reliability:
 
 - **AWS RDS (PostgreSQL)** stores user, habit, friend, and event data
-- **AWS S3** stores profile pictures
 - **AWS Lambda** handles automated background jobs
 - **AWS EventBridge** schedules reminders, streak checks, and weekly summaries
 - **AWS CloudWatch** monitors logs, errors, and system health
@@ -64,7 +63,7 @@ These scheduled jobs run through EventBridge, allowing the app to deliver update
 - Containerized backend with Docker
 - Automated CI/CD pipelines with GitHub Actions
 - PostgreSQL hosted on AWS RDS
-- Profile images stored in AWS S3
+- Profile images stored in local static file
 - Scheduled background jobs with AWS Lambda + EventBridge
 - Monitoring and logs with AWS CloudWatch
 
