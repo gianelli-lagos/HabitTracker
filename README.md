@@ -36,6 +36,8 @@ Built as a modern cloud-based application, HabitTracker combines personal produc
 
 HabitTracker uses a cloud-native AWS architecture designed for scalability, automation, and reliability:
 
+- **AWS ECR** stores Docker container images for the backend
+- **AWS ECS** (Fargate) runs the containerized backend serverlessly
 - **AWS RDS (PostgreSQL)** stores user, habit, friend, and event data
 - **AWS Lambda** handles automated background jobs
 - **AWS EventBridge** schedules reminders, streak checks, and weekly summaries
