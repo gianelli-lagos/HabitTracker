@@ -4,7 +4,7 @@ HabitTracker is a full-stack web app that helps users stay consistent through si
 
 Built as a modern cloud-based application, HabitTracker combines personal productivity with simple social features in a clean, engaging experience.
 
-🎥 **Demo Video:** [Click here to watch](#)  
+🎥 **Demo Video:** [Click here to watch](https://youtu.be/QJ6ALQ92zQ4?si=GMRqIqqnPIXGxeqt)  
 🌐 **Live App:** [Click here to try HabitTracker](https://habittracker-io.vercel.app/)
 
 ---
